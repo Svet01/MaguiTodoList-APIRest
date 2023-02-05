@@ -1,15 +1,11 @@
 from pathlib import Path
 from corsheaders.defaults import default_headers
-import os, environ
+from decouple import config
+import os
 
 
-env = environ.Env(
-    DEBUG=(bool,False)
-)
-environ.Env.read_env()
-
-DEBUG = env('DEBUG')
-SECRET_KEY = env('SECRET_KEY')
+DEBUG = config('DEBUG')
+SECRET_KEY = config('SECRET_KEY')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
