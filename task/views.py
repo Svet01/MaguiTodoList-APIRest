@@ -167,9 +167,12 @@ class UserDeleteAPIView(APIView): # Borrar cuenta del usuario
 class TaskCreateAPIVIew(APIView): # Creacion de tarea del usuario
     permission_classes = [IsAuthenticated] 
 
+    
     def post(self, request):
         user = request.user
         serializer = TaskCreateSerializer(data=request.data)
+        print(serializer.error_messages)
+        print(request.data)
         if serializer.is_valid():
             title = serializer.validated_data.get('title')
             task = Task.objects.create(
@@ -178,12 +181,14 @@ class TaskCreateAPIVIew(APIView): # Creacion de tarea del usuario
                 description=serializer.validated_data.get('description'),
                 content=serializer.validated_data.get('content'),
                 complete=serializer.validated_data.get('complete'),
+                imagen_task = serializer.validated_data.get('imagen_task')
             )
             tags = serializer.validated_data.get('tags')
             if tags:
                 for tag in tags:
                     task_tag, created = Tag.objects.get_or_create(user=request.user, name_tag=tag.get('name_tag'))
                     task.tags.add(task_tag)
+
             task.creat_at=django_timezone.now().astimezone(pytz.timezone("America/Argentina/Buenos_Aires"))
             task.last_edit=django_timezone.now().astimezone(pytz.timezone("America/Argentina/Buenos_Aires"))
             task.save()
@@ -192,6 +197,10 @@ class TaskCreateAPIVIew(APIView): # Creacion de tarea del usuario
                 status=status.HTTP_201_CREATED
             )                                                          
         else:
+            errors = serializer.errors
+            for field, message in errors.items():
+                print(f"{field}: {message}")
+            print(request.data)
             return Response(
                 {'Error': 'the fields are not valid'},
                 status=status.HTTP_400_BAD_REQUEST

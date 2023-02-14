@@ -47,7 +47,8 @@ class Task(models.Model):
     title = models.CharField(max_length=120, null=False, blank=False)
     description = models.CharField(max_length=80 ,null=True, blank=True)
     content = models.TextField(null=True, blank=True)
-    tags = models.ManyToManyField(Tag, related_name='tags_in_task', default=None)
+    imagen_task = models.ImageField(null=True, blank=True, default='', upload_to='imagen-task/') 
+    tags = models.ManyToManyField(Tag, related_name='tags_in_task',default=None)
     creat_at = models.DateTimeField(auto_now_add=True)
     last_edit = models.DateTimeField(auto_now=True)
     complete = models.BooleanField(default=False)
@@ -81,11 +82,34 @@ class UserManager(BaseUserManager):
         user = self.model(
             username=username,
             email=email,
-        )
-        user.date_joined = django_timezone.now().astimezone(pytz.timezone("America/Argentina/Buenos_Aires"))
+        )        
         user.set_password(password)
+        user.date_joined = django_timezone.now().astimezone(pytz.timezone("America/Argentina/Buenos_Aires"))
         user.save()
         return user
+
+    def create_superuser(self, username, password, email, first_name, last_name):
+        if self.filter(username=username).exists():
+            if not password:
+                if self.filter(email=email).exists:
+                    superuser = self.model(
+                        username=username,
+                        email=email,
+                        first_name=first_name,
+                        last_name=last_name,
+                        is_superuser=True,
+                        is_staff=True,
+                    )
+                    superuser.set_password(password)
+                    superuser.date_joined = django_timezone.now().astimezone(pytz.timezone("America/Argentina/Buenos_Aires"))
+                    superuser.save()
+                    return superuser
+                else:
+                    return ValidationError('Email is in valid')
+            else:
+                return ValidationError('Password not valid')
+        else:
+            return ValidationError('Username not valid')
 
 class UserProfile(AbstractBaseUser):
     username = models.CharField(max_length=50, unique=True)

@@ -116,13 +116,14 @@ class TaskCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Task
-        fields = ['user', 'tags', 'title', 'description', 'content', 'creat_at', 'last_edit', 'complete']
+        fields = ['user', 'tags', 'title', 'description', 'content', 'imagen_task' ,'creat_at', 'last_edit', 'complete']
         extra_kwargs = {
-            'tags' : {'required' : False},
+            'tags' : {'required' : False, 'default': None},
             'title' : {'required': True},
-            'description': {'required': False},
-            'content' : {'required': False},
-            'complete' : {'required': False, 'default': False}
+            'description': {'required': False, 'default': None},
+            'content' : {'required': False, 'default': None},
+            'complete' : {'required': False, 'default': False},
+            'imagen_task' : {'required' : False, 'default': None}
         }
 
 class TaskUserViewSerializer(serializers.ModelSerializer):
@@ -132,21 +133,23 @@ class TaskUserViewSerializer(serializers.ModelSerializer):
     last_edit = serializers.DateTimeField(format="%d/%m/%Y %H:%M:%S")
     class Meta:
         model = Task
-        fields = ['id', 'user', 'tags', 'title', 'description', 'content', 'complete', 'last_edit', 'creat_at']
+        fields = ['id', 'user', 'tags', 'title', 'description', 'content', 'imagen_task', 'complete', 'last_edit', 'creat_at']
 
     def get_user(self, obj):
         return obj.user.username
 
 class TaskUpdateSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
 
     class Meta:
         model = Task
-        fields = ['title', 'description', 'content', 'complete']
+        fields = ['imagen_task', 'tags' ,'title', 'description', 'content', 'complete']
         extra_kwargs = {
             "title" : {'required' : False},
             "description" : {'required' : False},
             "content" : {'required' : False},
-            "complete" : {'required' : False}
+            "complete" : {'required' : False},
+            "imagen_task" : {"required" : False}
         }
 
     def validate(self, data):
@@ -155,3 +158,4 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
         if task.user != self.context['request'].user:
             raise serializers.ValidationError("You do not have permissions to update this task.")
         return data
+    
